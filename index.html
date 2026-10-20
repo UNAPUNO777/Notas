@@ -190,7 +190,28 @@
 
   <script>
     
-    var API_URL = 'https://script.google.com/a/macros/unap.edu.pe/s/AKfycbxA-qyADpsHmMhHHh6wJL8BnXrbVb3UNJUtnEId8MicTaIaiW8pW-1ZEGvoYH0fUtDz/exec';
+    var API_URL = 'https://script.google.com/macros/s/AKfycbxA-qyADpsHmMhHHh6wJL8BnXrbVb3UNJUtnEId8MicTaIaiW8pW-1ZEGvoYH0fUtDz/exec';
+
+
+    // Consulta por JSONP: carga la respuesta como un <script>, sin problemas de CORS
+    function consultarJsonp(codigo, alOk, alError) {
+      var nombre = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+      var script = document.createElement('script');
+      var terminado = false;
+      var timer = setTimeout(function () { if (!terminado) { fin(); alError(); } }, 15000);
+
+      function fin() {
+        terminado = true;
+        clearTimeout(timer);
+        try { delete window[nombre]; } catch (e) { window[nombre] = undefined; }
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      window[nombre] = function (res) { if (terminado) return; fin(); alOk(res); };
+      script.onerror = function () { if (terminado) return; fin(); alError(); };
+      script.src = API_URL + '?codigo=' + encodeURIComponent(codigo) + '&callback=' + nombre;
+      document.head.appendChild(script);
+    }
 
     (function () {
       var formulario = document.getElementById('formulario');
@@ -276,10 +297,7 @@
           mostrarMensaje('No se pudo conectar con el servidor. Intenta nuevamente.');
         }
 
-        fetch(API_URL + '?codigo=' + encodeURIComponent(codigo))
-          .then(function (r) { return r.json(); })
-          .then(alResponder)
-          .catch(alFallar);
+        consultarJsonp(codigo, alResponder, alFallar);
       }
     })();
   </script>
