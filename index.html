@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Consulta de Notas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --lago: #0f2e4c;
+      --lago-oscuro: #0a2038;
+      --ichu: #b8862b;
+      --fondo: #eef1f4;
+      --papel: #ffffff;
+      --tinta: #14202b;
+      --tinta-suave: #4b5b69;
+      --linea: #d5dce3;
+      --error: #a62b2b;
+      --error-fondo: #fbeeee;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--fondo);
+      color: var(--tinta);
+      font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 32px 16px;
+    }
+    .tarjeta {
+      width: 100%;
+      max-width: 440px;
+      background: var(--papel);
+      border: 1px solid var(--linea);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(15, 46, 76, .08);
+    }
+    .cabecera {
+      background: var(--lago);
+      color: #fff;
+      padding: 22px 24px 20px;
+      border-bottom: 4px solid var(--ichu);
+    }
+    .institucion {
+      margin: 0 0 6px;
+      font-size: 13px;
+      color: #c4d2e0;
+    }
+    h1 {
+      margin: 0;
+      font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+      font-size: 28px;
+      line-height: 1.2;
+      font-weight: 700;
+      letter-spacing: -.01em;
+    }
+    .cuerpo { padding: 24px; }
+    .ayuda { margin: 0 0 20px; color: var(--tinta-suave); font-size: 15px; }
+    label { display: block; margin: 0 0 6px; font-weight: 600; font-size: 14px; }
+    .campo { margin-bottom: 16px; }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      font: inherit;
+      color: var(--tinta);
+      background: #fff;
+      border: 1px solid #9aa8b5;
+      border-radius: 6px;
+    }
+    input::placeholder { color: #8795a2; }
+    input:focus-visible, button:focus-visible {
+      outline: 3px solid rgba(184, 134, 43, .55);
+      outline-offset: 2px;
+      border-color: var(--lago);
+    }
+    button {
+      width: 100%;
+      padding: 13px 16px;
+      font: inherit;
+      font-weight: 600;
+      color: #fff;
+      background: var(--lago);
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color .15s;
+    }
+    button:hover:not(:disabled) { background: var(--lago-oscuro); }
+    [hidden] { display: none !important; }
+    .acciones { display: flex; gap: 10px; }
+    .acciones button { width: auto; flex: 1; }
+    .acciones #boton { flex: 2; }
+    button.secundario {
+      color: var(--lago);
+      background: #fff;
+      border: 1px solid var(--lago);
+    }
+    button.secundario:hover:not(:disabled) { background: #e9eef3; }
+    button:disabled { opacity: .65; cursor: progress; }
+
+    .mensaje {
+      display: none;
+      margin-top: 18px;
+      padding: 12px 14px;
+      color: var(--error);
+      background: var(--error-fondo);
+      border-left: 4px solid var(--error);
+      border-radius: 4px;
+      font-size: 15px;
+    }
+    .mensaje.visible { display: block; }
+
+    .resultado {
+      display: none;
+      margin-top: 22px;
+      padding-top: 20px;
+      border-top: 1px solid var(--linea);
+    }
+    .resultado.visible { display: block; }
+    .resultado dl { margin: 0; }
+    .resultado dt { font-size: 13px; color: var(--tinta-suave); }
+    .resultado dd { margin: 0 0 14px; font-size: 18px; font-weight: 500; overflow-wrap: anywhere; }
+    .resultado .nota {
+      margin: 4px 0 0;
+      font-family: "Source Serif 4", Georgia, serif;
+      font-size: 56px;
+      line-height: 1;
+      font-weight: 700;
+      color: var(--lago);
+    }
+    .aviso {
+      margin: 20px 0 0;
+      font-size: 13px;
+      color: var(--tinta-suave);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      button { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="tarjeta">
+    <header class="cabecera">
+      <p class="institucion">Universidad Nacional del Altiplano</p>
+      <h1>Consulta de notas</h1>
+    </header>
+
+    <div class="cuerpo">
+      <p class="ayuda">Ingresa tu código de estudiante para ver tu nota de la primera unidad.</p>
+
+      <form id="formulario" autocomplete="off" novalidate>
+        <div class="campo">
+          <label for="codigo">Código de estudiante</label>
+          <input type="text" id="codigo" name="codigo" maxlength="15"
+                 inputmode="text" autocapitalize="characters" spellcheck="false"
+                 placeholder="Ej. 201234" required>
+        </div>
+
+        <div class="acciones">
+          <button type="submit" id="boton">Ver mi nota</button>
+          <button type="button" id="nuevo" class="secundario" hidden>Nueva consulta</button>
+        </div>
+      </form>
+
+      <div class="mensaje" id="mensaje" role="alert"></div>
+
+      <section class="resultado" id="resultado" aria-live="polite">
+        <dl>
+          <dt>Apellidos</dt>
+          <dd id="apellido"></dd>
+          <dt>Nombres</dt>
+          <dd id="nombre"></dd>
+          <dt>Nota de la primera unidad</dt>
+          <dd><p class="nota" id="nota1"></p></dd>
+        </dl>
+        <p class="aviso">Si tu nota no es la correcta, comunícate con tu docente.</p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    
+    var API_URL = 'https://script.google.com/a/macros/unap.edu.pe/s/AKfycbxA-qyADpsHmMhHHh6wJL8BnXrbVb3UNJUtnEId8MicTaIaiW8pW-1ZEGvoYH0fUtDz/exec';
+
+    (function () {
+      var formulario = document.getElementById('formulario');
+      var boton = document.getElementById('boton');
+      var nuevo = document.getElementById('nuevo');
+      var codigoEl = document.getElementById('codigo');
+      var mensajeEl = document.getElementById('mensaje');
+      var resultadoEl = document.getElementById('resultado');
+      var idConsulta = 0; // evita que una respuesta tardía aparezca tras limpiar
+
+      formulario.addEventListener('submit', function (e) {
+        e.preventDefault();
+        buscar();
+      });
+      nuevo.addEventListener('click', nuevaConsulta);
+
+      function limpiar(texto) {
+        return String(texto || '').replace(/\s+/g, '').toUpperCase().slice(0, 20);
+      }
+
+      function ocultarTodo() {
+        nuevo.hidden = true;
+        mensajeEl.classList.remove('visible');
+        resultadoEl.classList.remove('visible');
+      }
+
+      function mostrarMensaje(texto) {
+        mensajeEl.textContent = texto;   // textContent: nunca se interpreta como HTML
+        mensajeEl.classList.add('visible');
+      }
+
+      function cargando(activo) {
+        boton.disabled = activo;
+        boton.textContent = activo ? 'Buscando…' : 'Ver mi nota';
+      }
+
+      function nuevaConsulta() {
+        idConsulta++;
+        cargando(false);
+        ocultarTodo();
+        codigoEl.value = '';
+        document.getElementById('apellido').textContent = '';
+        document.getElementById('nombre').textContent = '';
+        document.getElementById('nota1').textContent = '';
+        codigoEl.focus();
+      }
+
+      function buscar() {
+        ocultarTodo();
+        var codigo = limpiar(codigoEl.value);
+
+        if (!/^[A-Z0-9]{4,15}$/.test(codigo)) {
+          mostrarMensaje('Revisa el código: debe tener de 4 a 15 letras o números.');
+          codigoEl.focus();
+          return;
+        }
+
+        if (API_URL.indexOf('https://script.google.com/') !== 0) {
+          mostrarMensaje('La página aún no está configurada: falta la URL de la aplicación web.');
+          return;
+        }
+
+        var mia = ++idConsulta;
+        cargando(true);
+
+        function alResponder(res) {
+          if (mia !== idConsulta) return;
+          cargando(false);
+          if (!res || !res.ok) {
+            mostrarMensaje((res && res.mensaje) || 'No se pudo completar la consulta.');
+            return;
+          }
+          document.getElementById('apellido').textContent = res.apellido || 'N/A';
+          document.getElementById('nombre').textContent = res.nombre || 'N/A';
+          document.getElementById('nota1').textContent = res.nota1 || 'N/A';
+          resultadoEl.classList.add('visible');
+          nuevo.hidden = false;
+        }
+
+        function alFallar() {
+          if (mia !== idConsulta) return;
+          cargando(false);
+          mostrarMensaje('No se pudo conectar con el servidor. Intenta nuevamente.');
+        }
+
+        fetch(API_URL + '?codigo=' + encodeURIComponent(codigo))
+          .then(function (r) { return r.json(); })
+          .then(alResponder)
+          .catch(alFallar);
+      }
+    })();
+  </script>
+</body>
+</html>
